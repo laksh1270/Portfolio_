@@ -1,0 +1,119 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Folder {
+  id         String    @id @default(cuid())
+  name       String
+  parentId   String?
+  parent     Folder?   @relation("FolderToFolder", fields: [parentId], references: [id])
+  subfolders Folder[]  @relation("FolderToFolder")
+  projects   Project[] @relation("FolderToProject")
+}
+
+model Tag {
+  id       String    @id @default(cuid())
+  name     String    @unique
+  projects Project[] @relation("ProjectToTag")
+}
+
+model Project {
+  id              String           @id @default(cuid())
+  title           String
+  description     String?
+  thumbnail       String?
+  platformLink    String?
+  platformType    String?
+  clientName      String?
+  clientLink      String?
+  contentType     String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  displayOrder    Int              @default(0)
+  showInMain      Boolean          @default(true)
+  clientAvatar    String?
+  likes           String?
+  views           String?
+  folders         Folder[]         @relation("FolderToProject")
+  metadataOptions MetadataOption[] @relation("MetadataOptionToProject")
+  tags            Tag[]            @relation("ProjectToTag")
+}
+
+model MetadataOption {
+  id       String    @id @default(cuid())
+  type     String
+  name     String
+  projects Project[] @relation("MetadataOptionToProject")
+
+  @@unique([type, name])
+}
+
+model Testimonial {
+  id           String   @id @default(cuid())
+  name         String?  @default("Anonymous Client")
+  feedback     String
+  rating       Int      @default(5)
+  email        String?
+  phone        String?
+  videoLink    String?
+  approved     Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  displayOrder Int      @default(0)
+}
+
+model SiteSettings {
+  id                String  @id @default("global")
+  showReelUrl       String?
+  showReelThumbnail String?
+  showClients       Boolean @default(true)
+}
+
+model Client {
+  id           String   @id @default(cuid())
+  channelName  String
+  channelUrl   String
+  channelImage String?
+  subscribers  String?
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+}
+
+model WebProject {
+  id           String   @id @default(cuid())
+  name         String
+  description  String?
+  thumbnail    String?
+  images       String[] @default([])
+  githubLink   String?
+  liveLink     String?
+  techStack    String[] @default([])
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model WebTestimonial {
+  id           String   @id @default(cuid())
+  projectName  String   @default("Unnamed Project")
+  liveLink     String?
+  githubLink   String?
+  figmaLink    String?
+  name         String?  @default("Anonymous Client")
+  feedback     String
+  rating       Int      @default(5)
+  email        String?
+  phone        String?
+  approved     Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  displayOrder Int      @default(0)
+}
+
+model WebTechStack {
+  id   String @id @default(cuid())
+  name String @unique
+}
